@@ -167,6 +167,7 @@ function getCookie(name) {
 var amount = "{{ grand_total }}";
 var url = "{% url 'payments' %}";
 var csrftoken = getCookie('csrftoken');
+console.log("CSRF:", csrftoken);
 var orderID = "{{ order.order_number }}";
 var payment_method = "PayPal";
 var redirect_url = "{% url 'order_complete' %}"

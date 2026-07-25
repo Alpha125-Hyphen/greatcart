@@ -92,9 +92,10 @@ def place_order(request, total=0, quantity=0):
     tax = (2 * total)/ 100 
     grand_total = total + tax
     if request.method == 'POST':
-        form = OrderForm(request.POST) 
+        form = OrderForm(request.POST)
+
         if form.is_valid():
-            #Store all the billing information inside Order table
+            # Store all the billing information inside Order table
             data = Order()
             data.user = current_user
             data.first_name = form.cleaned_data['first_name']
@@ -107,32 +108,42 @@ def place_order(request, total=0, quantity=0):
             data.state = form.cleaned_data['state']
             data.city = form.cleaned_data['city']
             data.order_note = form.cleaned_data['order_note']
-            data.order_total = grand_total 
-            data.tax = tax 
+            data.order_total = grand_total
+            data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
-            #Generate order number 
+
+            # Generate order number
             yr = int(datetime.date.today().strftime('%Y'))
             dt = int(datetime.date.today().strftime('%d'))
             mt = int(datetime.date.today().strftime('%m'))
-            d = datetime.date(yr,mt,dt)
-            current_date = d.strftime("%Y%m%d") #20210305
+            d = datetime.date(yr, mt, dt)
+            current_date = d.strftime("%Y%m%d")
             order_number = current_date + str(data.id)
-            data.order_number = order_number 
+            data.order_number = order_number
             data.save()
-            
-            order = Order.objects.get(user=current_user,is_ordered=False,order_number=order_number)
+
+            order = Order.objects.get(
+                user=current_user,
+                is_ordered=False,
+                order_number=order_number
+            )
+
             context = {
-                'order' : order,
-                'cart_items' : cart_items,
-                'total' : total,
-                'tax' : tax,
-                'grand_total' : grand_total,
-                
+                'order': order,
+                'cart_items': cart_items,
+                'total': total,
+                'tax': tax,
+                'grand_total': grand_total,
             }
-            return render(request,'orders/payments.html',context)
-    else:
-        return redirect('checkout')
+
+            return render(request, 'orders/payments.html', context)
+
+        else:
+            print(form.errors)
+            return redirect('checkout')
+
+    return redirect('checkout')
     
 def order_complete(request):
     order_number = request.GET.get('order_number')
